@@ -1,0 +1,85 @@
+const { SlashCommandBuilder, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
+
+module.exports = {
+	data: new SlashCommandBuilder()
+		.setName('clear')
+		.setDescription('Apaga as mensagens')
+        .addIntegerOption(option =>
+            option
+            .setName('amount')
+            .setDescription('Quantia de Mensagens a serem deletadas')
+            .setMinValue(1)
+            .setMaxValue(100)
+            .setRequired(true)
+        )
+        .addUserOption(option =>
+            option 
+            .setName('target')
+            .setDescription('Selecione o Usuário a ter as mensagens deletadas')
+        ),
+
+userPermissions: [PermissionFlagsBits.ManageMessages],
+botPermissions: [PermissionFlagsBits.ManageMessages],
+
+run: async (client, interaction) => { 
+    const { options, channel} = interaction
+    let amount = options.addIntegerOption('amount')
+    const target = options.getUser('target')
+    const multiMsg = amount === 1 ? "message" : "messages"
+
+    if (!amount || amount > 100 || amount < 1) { 
+        return await interaction.reply({ 
+            content: "Por Favor especifique o numero de mensagens a serem excluidas entre 1 a 100",
+            ephemeral: true
+        })
+    }
+
+    try {
+        const channelMessages = await channel.messages.fetch()
+        if (channelMessages.size === 0) { 
+            return await interaction.reply({ 
+                content: "Não tem nenhuma mensagem para ser deletada nesse canal.",
+                ephemeral: true
+            })
+        }
+        if (amount > channelMessages.size) amount = channelMessages.size
+
+        const clearEmbed = new EmbedBuilder().setColor('#4AFF01')
+
+        await interaction.deferReply({ephemeral: true})
+
+        let messagesToDelete = []
+
+        if (target) { 
+            let i = 0
+            channelMessages.forEach((m) => { 
+                if (m.author.id === target.id && messagesToDelete.length < amount) { 
+                    messagesToDelete.push(m)
+                    i++
+                }
+            })
+
+            clearEmbed.setDescription(`
+            \`✅\` Mensagens limpas com sucesso: \`${messagesToDelete.length}\` ${multiMsg} de ${target} no canal: ${channel}.
+            `)
+        } else { 
+            messagesToDelete = channelMessages.first(amount)
+            clearEmbed.setDescription(`
+            \`✅\` Mensagens limpas com sucesso: \`${messagesToDelete.length}\` ${multiMsg} no canal: ${channel}.
+            `)
+        }
+
+        if (messagesToDelete.length > 0) { 
+            await channel.bulkDelete(messagesToDelete, true)
+        }
+
+        await interaction.editReply({embeds: [clearEmbed]})
+    } catch (error) {
+        console.log(error)
+        await interaction.followUp({
+            content: "Ocorreu um erro ao limpar as mensagens",
+            ephemeral: true
+        })
+    }
+}
+};
