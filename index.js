@@ -33,16 +33,29 @@ for (const file of eventFiles) {
 	const filePath = path.join(eventsPath, file);
 	const event = require(filePath);
 	if (event.once) {
-		client.once(event.name, (...args) => event.execute(...args));
+		client.on(event.name, (...args) => event.execute(...args));
 	} else {
 		client.on(event.name, (...args) => event.execute(...args));
 	}
 }
 
+//Loading Events
+const schemasPath = path.join(__dirname, 'Schemas');
+const schemaFiles = fs.readdirSync(schemasPath).filter(file => file.endsWith('.js'));
+
+for (const file of schemaFiles) {
+	const filePath = path.join(schemasPath, file);
+	const schema = require(filePath);
+	if (schema.on) {
+		client.on(schema.name, (...args) => schema.execute(...args));
+	} else {
+		client.on(schema.name, (...args) => schema.execute(...args));
+	}
+}
 
 
 
-client.once(Events.ClientReady, readyClient => {
+client.on(Events.ClientReady, readyClient => {
 	console.log(`✅ Bot Logado: ${readyClient.user.tag}`);
 });
 client.login(TOKEN)

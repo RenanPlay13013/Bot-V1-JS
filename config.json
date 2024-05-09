@@ -1,5 +1,6 @@
 {
     "TOKEN": "MTIzNjA3MzAxMzI1MDc1MjU2Mg.GOS8VT.cNP1gpeky45EFgnFYaA_xTz5Y_RBQSYmhCDZAU",
     "CLIENT_ID": "1236073013250752562",
-    "GUILD_ID": "1008706574426050560"
+    "GUILD_ID": "1008706574426050560",
+    "mongoURL": "mongodb+srv://renanluisdepaula:bolinho@database.inkcwlc.mongodb.net/?retryWrites=true&w=majority&appName=DataBase"
 }
